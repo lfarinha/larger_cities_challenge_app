@@ -1,9 +1,9 @@
 from pydantic import BaseModel, Field
 
 
-class NearbyCities(BaseModel):
+class NearbyCity(BaseModel):
     """
-        NearbyCities response model
+    NearbyCities response model
     """
 
     name: str = Field(description="The name of the city including state and country")
@@ -14,9 +14,9 @@ class NearbyCities(BaseModel):
     )
 
 
-class NearbyCitiesWithDistance(BaseModel):
+class NearbyCityWithDistance(BaseModel):
     """
-        NearbyCities with Distance response model
+    NearbyCities with Distance response model
     """
 
     name: str = Field(description="The name of the city including state and country")
@@ -31,6 +31,6 @@ class NearbyCitiesWithDistance(BaseModel):
 
 
 class SuggestionsResponse(BaseModel):
-    suggestions: list[NearbyCities] | list = Field(
+    suggestions: list[NearbyCity] | list = Field(
         description="The result of the search of the largest closest city"
     )

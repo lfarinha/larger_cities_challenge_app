@@ -14,9 +14,9 @@ async def home() -> str:
 
 @app.get("/suggestions", response_model=SuggestionsResponse)
 async def suggestions(
-    q: str = Query(),
-    latitude: str = Query(default=None),
-    longitude: str = Query(default=None),
+    q: str = Query(pattern="^[a-zA-Z -]+$"),
+    latitude: str = Query(default=None, pattern=r'^-?\d+(\.\d+)?$'),
+    longitude: str = Query(default=None, pattern=r'^-?\d+(\.\d+)?$'),
 ) -> SuggestionsResponse | HTTPException:
     """
     Endpoint to handle requests for suggestions from the users.
