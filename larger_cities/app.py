@@ -51,3 +51,6 @@ async def suggestions(
     finally:
         return response
 
+
+if __name__ == "__main__":
+    uvicorn.run(app=app, port=5000, host="0.0.0.0")
