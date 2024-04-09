@@ -3,17 +3,10 @@ import os
 import pandas
 from geopy.distance import geodesic
 
-from larger_cities.exceptions.custom_exceptions import (
-    NoDataInTSVFile,
-    NoCitiesFoundForName,
-)
-from larger_cities.models.response_models import (
-    NearbyCity,
-    NearbyCityWithDistance,
-    SuggestionsResponse,
-)
-
-PROJECT_ROOT_DIR = os.path.dirname(os.path.abspath(os.getcwd()))
+from larger_cities.exceptions.custom_exceptions import NoDataInTSVFile
+from larger_cities.models.response_models import (NearbyCity,
+                                                  NearbyCityWithDistance,
+                                                  SuggestionsResponse)
 
 
 async def suggest_larger_cities(
@@ -26,20 +19,19 @@ async def suggest_larger_cities(
 
     Params:
         q (str): The partial (or complete) search term is passed as a query string parameter
-        latitude (str): The latitude of the larger city to search for
-        longitude (str): The longitude of the larger city to search for
+        latitude (str | None): The latitude of the larger city to search for
+        longitude (str | None): The longitude of the larger city to search for
 
     Returns:
         list (SuggestionRequest | None): Either return a list of results or an empty list
-
-    Raises:
-
 
     """
     response: list[NearbyCity | None]
     cities: pandas.DataFrame = await get_cities_from_file()
     cities_by_name: pandas.DataFrame = await find_nearby_cities_by_name(cities, q)
-    nearby_cities: list[NearbyCity] | list = await filter_nearby_cities_by_name(cities_by_name)
+    nearby_cities: list[NearbyCity] | list = await filter_nearby_cities_by_name(
+        cities_by_name
+    )
 
     if nearby_cities:
         if latitude and longitude:
@@ -58,14 +50,11 @@ async def get_cities_from_file() -> pandas.DataFrame:
     Read cities from a tsv file
 
     Returns:
-        cities (pands.Dataframe): A dataframe with all the cities in the file.
-
-    Raises:
-        NoDataInTSVFile: if the file is empty.
+        cities (pands.Dataframe): A dataframe with all the cities in the file or empty.
 
     """
     cities: pandas.DataFrame = pandas.read_csv(
-        f"{PROJECT_ROOT_DIR}/cities_canada-usa.tsv", delimiter="\t"
+        f"{get_root_project_path()}/cities_canada-usa.tsv", delimiter="\t"
     )
 
     if cities.empty:
@@ -82,7 +71,6 @@ async def find_nearby_cities_by_name(
 
     Returns:
         cities (pandas.DataFrame): A dataframe with the near cities.
-
     """
     return cities[
         (cities["name"].str.lower().str.contains(q.lower()))
@@ -92,7 +80,7 @@ async def find_nearby_cities_by_name(
 
 async def filter_nearby_cities_by_name(
     cities_by_name: pandas.DataFrame,
-) -> list[NearbyCity] | list:
+) -> list[NearbyCity]:
     """
         Filter found nearby cities by name
 
@@ -147,7 +135,7 @@ async def rank_nearby_cities_without_lat_and_log_provided(
         union = len(input_city.union(nearby_city))
         city.score = round(intersection / union if union != 0 else 0, 1)
 
-    # sort the nearby cities based on their rating score
+    # nearby_cities = sorted(nearby_cities, key=lambda x: x.score, reverse=True)
     nearby_cities = sorted(nearby_cities, key=lambda x: x.score, reverse=True)
 
     return nearby_cities
@@ -184,6 +172,7 @@ async def rank_nearby_cities_with_lat_and_log_provided(
             )
         )
 
+    # use the internal max() function to get the largest distance to the input city
     max_distance = max([city.distance for city in nearby_cities_with_distance])
 
     if not max_distance:
@@ -195,14 +184,22 @@ async def rank_nearby_cities_with_lat_and_log_provided(
             name=city.name,
             latitude=city.latitude,
             longitude=city.longitude,
-            score=(
-                round(1 - (city.distance / max_distance), 1)
-            ),
+            score=(round(1 - (city.distance / max_distance), 1)),
         )
         for city in nearby_cities_with_distance
     ]
 
-    # sort the nearby cities based on their rating score
+    # sort the nearby cities based on their rating score in descending form
     nearby_cities = sorted(nearby_cities, key=lambda x: x.score, reverse=True)
 
     return nearby_cities
+
+
+def get_root_project_path() -> str:
+    """
+    Get the root of the project absolute path
+
+    Returns:
+        str: The absolute path to the project
+    """
+    return os.path.dirname(os.path.abspath(os.getcwd()))

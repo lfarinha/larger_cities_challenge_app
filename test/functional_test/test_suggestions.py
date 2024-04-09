@@ -3,7 +3,8 @@ from fastapi.testclient import TestClient
 from starlette import status
 
 from larger_cities.app import app
-from larger_cities.models.response_models import NearbyCity, SuggestionsResponse
+from larger_cities.models.response_models import (NearbyCity,
+                                                  SuggestionsResponse)
 
 
 @pytest.fixture

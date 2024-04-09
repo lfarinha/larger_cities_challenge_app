@@ -31,6 +31,10 @@ class NearbyCityWithDistance(BaseModel):
 
 
 class SuggestionsResponse(BaseModel):
+    """
+    Suggestions response model
+    """
+
     suggestions: list[NearbyCity] | list = Field(
         description="The result of the search of the largest closest city"
     )

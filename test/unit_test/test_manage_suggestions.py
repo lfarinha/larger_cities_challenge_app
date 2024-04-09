@@ -3,13 +3,9 @@ import pytest
 
 from larger_cities.models.response_models import NearbyCity
 from larger_cities.tools.manage_suggestions import (
-    suggest_larger_cities,
-    rank_nearby_cities_with_lat_and_log_provided,
-    find_nearby_cities_by_name,
-    get_cities_from_file,
-    filter_nearby_cities_by_name,
-    rank_nearby_cities_without_lat_and_log_provided,
-)
+    filter_nearby_cities_by_name, find_nearby_cities_by_name,
+    get_cities_from_file, rank_nearby_cities_with_lat_and_log_provided,
+    rank_nearby_cities_without_lat_and_log_provided, suggest_larger_cities)
 
 
 @pytest.mark.asyncio
