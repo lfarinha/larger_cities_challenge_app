@@ -3,9 +3,13 @@ import pytest
 
 from larger_cities.models.response_models import NearbyCity
 from larger_cities.tools.manage_suggestions import (
-    filter_nearby_cities_by_name, find_nearby_cities_by_name,
-    get_cities_from_file, rank_nearby_cities_with_lat_and_log_provided,
-    rank_nearby_cities_without_lat_and_log_provided, suggest_larger_cities)
+    filter_nearby_cities_by_name,
+    find_nearby_cities_by_name,
+    get_cities_from_file,
+    rank_nearby_cities_with_lat_and_log_provided,
+    rank_nearby_cities_without_lat_and_log_provided,
+    suggest_larger_cities,
+)
 
 
 @pytest.mark.asyncio
@@ -154,3 +158,28 @@ async def test_rank_nearby_cities_without_lat_and_log_provided(q, expected):
         q,
     )
     assert rank_cities == expected
+
+
+@pytest.mark.asyncio
+async def test_get_cities_from_file():
+    """Verify data is returned from the tsv file"""
+    data = await get_cities_from_file()
+    assert not data.empty
+
+
+@pytest.mark.asyncio
+async def test_find_nearby_cities_by_name():
+    """Verify find nearby cities returns a value"""
+    cities = await get_cities_from_file()
+    nearby_cities = await find_nearby_cities_by_name(cities, "London")
+    assert not nearby_cities.empty
+
+
+@pytest.mark.asyncio
+async def test_filter_nearby_cities_by_name():
+    """Verify find nearby cities returns a value"""
+    cities = await get_cities_from_file()
+    nearby_cities = await find_nearby_cities_by_name(cities, "London")
+    filtered_cities = await filter_nearby_cities_by_name(nearby_cities)
+    assert filtered_cities
+    assert len(filtered_cities) > 1

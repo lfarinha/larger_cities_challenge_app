@@ -28,7 +28,7 @@ async def suggest_larger_cities(
         longitude (str | None): The longitude of the larger city to search for
 
     Returns:
-        list (SuggestionRequest | None): Either return a list of results or an empty list
+        SuggestionRequest (list[NearbyCity]): Either return a list of results or an empty list
 
     """
     response: list[NearbyCity | None]
