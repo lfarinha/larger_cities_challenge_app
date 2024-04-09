@@ -4,9 +4,14 @@ import pandas
 from geopy.distance import geodesic
 
 from larger_cities.exceptions.custom_exceptions import NoDataInTSVFile
-from larger_cities.models.response_models import (NearbyCity,
-                                                  NearbyCityWithDistance,
-                                                  SuggestionsResponse)
+from larger_cities.models.response_models import (
+    NearbyCity,
+    NearbyCityWithDistance,
+    SuggestionsResponse,
+)
+from larger_cities.tools.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 async def suggest_larger_cities(
@@ -27,8 +32,11 @@ async def suggest_larger_cities(
 
     """
     response: list[NearbyCity | None]
+    # Get the cities from the tsv file
     cities: pandas.DataFrame = await get_cities_from_file()
+    # find the nearby cities to the input city from the user
     cities_by_name: pandas.DataFrame = await find_nearby_cities_by_name(cities, q)
+    # filter the nearby cities by name and apply name logic
     nearby_cities: list[NearbyCity] | list = await filter_nearby_cities_by_name(
         cities_by_name
     )
@@ -53,8 +61,9 @@ async def get_cities_from_file() -> pandas.DataFrame:
         cities (pands.Dataframe): A dataframe with all the cities in the file or empty.
 
     """
+    project_root_dir: str = os.path.dirname(os.path.abspath(os.getcwd()))
     cities: pandas.DataFrame = pandas.read_csv(
-        f"{get_root_project_path()}/cities_canada-usa.tsv", delimiter="\t"
+        f"{project_root_dir}/cities_canada-usa.tsv", delimiter="\t"
     )
 
     if cities.empty:
@@ -193,13 +202,3 @@ async def rank_nearby_cities_with_lat_and_log_provided(
     nearby_cities = sorted(nearby_cities, key=lambda x: x.score, reverse=True)
 
     return nearby_cities
-
-
-def get_root_project_path() -> str:
-    """
-    Get the root of the project absolute path
-
-    Returns:
-        str: The absolute path to the project
-    """
-    return os.path.dirname(os.path.abspath(os.getcwd()))

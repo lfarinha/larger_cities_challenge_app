@@ -1,11 +1,26 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+
+from larger_cities.tools.logger import setup_logger
 
 from larger_cities.exceptions.custom_exceptions import NoDataInTSVFile
 from larger_cities.models.response_models import SuggestionsResponse
 from larger_cities.tools.manage_suggestions import suggest_larger_cities
 
+
+logger = setup_logger(__name__)
+
 app = FastAPI(title="Suggestions API Challenge")
+
+# Update origins appropriately before moving to PROD
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localost"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -39,11 +54,13 @@ async def suggestions(
     try:
         response = await suggest_larger_cities(q, latitude, longitude)
     except NoDataInTSVFile as e:
+        logger.debug(f"Error: {e}")
         return HTTPException(
             status_code=500,
             detail="Could not read from data file. Please try again later.",
         )
     except Exception as e:
+        logger.debug(f"Error: {e}")
         return HTTPException(
             status_code=500,
             detail=str(e),
@@ -53,4 +70,4 @@ async def suggestions(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app=app, port=5000, host="0.0.0.0")
+    uvicorn.run(app=app, port=5000, host="0.0.0.0", log_level="info")

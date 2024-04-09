@@ -4,6 +4,10 @@
 
 FastAPI application to find suggestions for nearby large cities
 
+## API Documentation
+
+The API documentation can be found navigating to the following url: http://localhost:5000/docs
+
 ## Installation
 
 1. Decompress the larger_cities_challenge_app.zip file:
